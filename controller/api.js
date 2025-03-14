@@ -16,7 +16,7 @@ const readFile = (filepath) => {
       if (err) {
         return reject(err);
       }
-      return resolve(buffer);
+      return  resolve(buffer);
     });
   });
 };
