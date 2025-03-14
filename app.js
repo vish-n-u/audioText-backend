@@ -21,6 +21,12 @@ async function startApp() {
 
     const route = require("./route/route.js");
     route(app);
+     fs.access("uploads",fs.constants.F_OK,(err)=>{
+      if(err){
+        fs.mkdirSync("uploads")
+      }
+      
+    })
 
     require("./route/route.js")(app);
     app.listen(3000, () => {
@@ -31,27 +37,6 @@ async function startApp() {
   }
 }
 
-// const upload = multer({ storage: storage });
-
-// app.post("/uploadFile", upload.single('file'), async(req, res) => {
-//   if (!req.file) {async
-//     return res.status(400).send(JSON.stringify('No file uploaded.'));
-//   }
-
-//   console.log('File details:', req.file);
-//   const file = req.file;
-
-//     const outputPath = file.path;
-
-//   //  await convertPcmToWav(inputPath, outputPath, sampleRate, channels, bitDepth);
-//   // const response = await   quickstart(outputPath)
-//   const response = "Dummy Data"
-
-//   fs.unlinkSync(file.path)
-//    console.log("response===>",response)
-
-//   res.send(JSON.stringify(response));
-// });
 
 startApp();
 
