@@ -30,8 +30,10 @@ const createUser = async (req, res) => {
       userId: user.userId,
       usedTranscriptionTimeInMilliSec: "0",
       totalTranscriptionTimeInMilliSec: minToMillSecInString(5),
-      usedNumberOfAiTextConversion: 0,
-      totalNumberOfAiTextCoversion: 3,
+      linkedinTextConversionCount: 0,
+      totalLinkedinTextConversionCount: 3,
+      usedTextEnhanceCount: 0,
+      totalTextEnhanceCount: 10,
     });
     console.log("User Created Successfully");
     return res.status(200).send(JSON.stringify("User Created Successfully"));
@@ -52,9 +54,6 @@ const audioTranscription = async (req, res) => {
         return WavDecoder.decode(buffer);
       })
       .then(async function (audioData) {
-        console.log(audioData.sampleRate);
-        console.log(audioData.channelData[0]); // Float32Array
-        console.log(audioData.channelData[1]); // Float32Array
         audioDurationInSec =
           audioData.channelData[0].length / audioData.sampleRate;
         let doc = await UserDataModel.findOne({ userId: req.body.uid });
@@ -64,10 +63,13 @@ const audioTranscription = async (req, res) => {
         console.log("e==>", e);
         throw Error("");
       });
-      let usedtime = Number(data.usedTranscriptionTimeInMilliSec) + (audioDurationInSec * 1000)
+    let usedtime =
+      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
+    console.log("audioDurationInSec==>", audioDurationInSec);
+    console.log("time==>", usedtime);
 
     if (
-      Number(data.usedTranscriptionTimeInMilliSec) + (audioDurationInSec * 1000) >
+      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000 >
       data.totalTranscriptionTimeInMilliSec + 60000
     ) {
       throw new Error("");
@@ -75,29 +77,20 @@ const audioTranscription = async (req, res) => {
 
     const response = await quickstart(outputPath);
     data.usedTranscriptionTimeInMilliSec = String(
-      Number(data.usedTranscriptionTimeInMilliSec) + (audioDurationInSec * 1000)
+      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000
     );
     await data.save();
 
     //   const response = "Dummy Data"
 
     fs.unlinkSync(file.path);
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `Enhance the following text :${response} add necessary formatting and bulleting if required, this data is going to be used as notes by the user , just provide the actual content , dont add any prefix or suffix like "Sure this is your enhanced text" the content needs to be directly useable.`,
-        },
-      ],
-      store: true,
-    });
+    console.log("response===>", response);
 
     res.send(
       JSON.stringify({
-        response:completion.choices[0].message.content,
+        response,
         Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
-        Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec
+        Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
       })
     );
   } catch (e) {
@@ -111,14 +104,14 @@ const audioTranscription = async (req, res) => {
   }
 };
 
-const transformText = async (req, res) => {
+const convertTextToLinkedinContent = async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
-          content: `Based on this text :${req.body.text} provide me content that I can post on linkedin , add necessary hashtags , just provide the actual content , dont add any prefix or suffix like "Sure this is your linkedin post" the content needs to be directly shareable.`,
+          content: `Based on this text :${req.body.text} provide me content that I can post on linkedin , add necessary hashtags and also just provide the content in unicode format so bolds and italics are retained that I can directly share`,
         },
       ],
       store: true,
@@ -131,6 +124,34 @@ const transformText = async (req, res) => {
     res.status(500).send(JSON.stringify("Internal server error"));
   }
 };
+
+async function enhanceText(req, res) {
+  try {
+    let doc = await UserDataModel.findOne({ userId: req.body.uid });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Enhance the following text :${req.body.text} add necessary formatting and bulleting if required, this data is going to be used as notes by the user , just provide the actual content , dont add any prefix or suffix like "Sure this is your enhanced text" the content needs to be directly useable.`,
+        },
+      ],
+      store: true,
+    });
+    doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
+    const data = await doc.save();
+    res.send(
+      JSON.stringify({
+        response: completion.choices[0].message.content,
+        Used_Text_Enhance_Times: data.usedTextEnhanceCount,
+        Total_Text_Enhance_Times: data.totalTextEnhanceCount,
+      })
+    );
+  } catch (e) {
+    console.log("e==>", e, e.message);
+    res.status(500).send(JSON.stringify("Internal server error"));
+  }
+}
 
 async function quickstart(inputFile) {
   if (!fs.existsSync(inputFile)) {
@@ -153,4 +174,9 @@ function minToMillSecInString(min) {
   return `${value}`;
 }
 
-module.exports = { createUser, audioTranscription, transformText };
+module.exports = {
+  createUser,
+  audioTranscription,
+  convertTextToLinkedinContent,
+  enhanceText
+};

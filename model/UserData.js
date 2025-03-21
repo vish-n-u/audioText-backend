@@ -5,8 +5,10 @@ const UserDataSchema = new mongoose.Schema({
     userId:String,
     usedTranscriptionTimeInMilliSec:String,
     totalTranscriptionTimeInMilliSec:String,
-    usedNumberOfAiTextConversion:Number,
-    totalNumberOfAiTextCoversion:Number
+    linkedinTextConversionCount:Number,
+    totalLinkedinTextConversionCount:Number,
+    usedTextEnhanceCount : Number,
+    totalTextEnhanceCount:Number
 
 
 },{
