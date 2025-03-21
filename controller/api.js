@@ -82,11 +82,20 @@ const audioTranscription = async (req, res) => {
     //   const response = "Dummy Data"
 
     fs.unlinkSync(file.path);
-    console.log("response===>", response);
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Enhance the following text :${response} add necessary formatting and bulleting if required, this data is going to be used as notes by the user , just provide the actual content , dont add any prefix or suffix like "Sure this is your enhanced text" the content needs to be directly useable.`,
+        },
+      ],
+      store: true,
+    });
 
     res.send(
       JSON.stringify({
-        response,
+        response:completion.choices[0].message.content,
         Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
         Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec
       })
