@@ -109,7 +109,7 @@ const transformText = async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `Based on this text :${req.body.text} provide me content that I can post on linkedin , add necessary hashtags and also just provide the content in unicode format so bolds and italics are retained that I can directly share`,
+          content: `Based on this text :${req.body.text} provide me content that I can post on linkedin , add necessary hashtags , just provide the actual content , dont add any prefix or suffix like "Sure this is your linkedin post" the content needs to be directly shareable.`,
         },
       ],
       store: true,
