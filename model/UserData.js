@@ -2,7 +2,11 @@ const mongoose = require("mongoose")
 
 
 const UserDataSchema = new mongoose.Schema({
-    userId:String,
+    userId:{
+        type:String,
+        unique:true
+        
+    },
     usedTranscriptionTimeInMilliSec:String,
     totalTranscriptionTimeInMilliSec:String,
     linkedinTextConversionCount:Number,

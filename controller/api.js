@@ -38,7 +38,11 @@ const createUser = async (req, res) => {
     console.log("User Created Successfully");
     return res.status(200).send(JSON.stringify("User Created Successfully"));
   } catch (e) {
-    console.log("e==>", e);
+    console.log("e==>", e,e.errmsg,e.message);
+    if(e.errmsg.includes("duplicate key error")){
+      console.log("inside here")
+      return res.status(200).send(JSON.stringify("User Created Successfully"));
+    }
     return res.status(500).send(JSON.stringify("Internal server Error"));
   }
 };
@@ -69,8 +73,8 @@ const audioTranscription = async (req, res) => {
     console.log("time==>", usedtime);
 
     if (
-      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000 >
-      data.totalTranscriptionTimeInMilliSec + 60000
+      Number(data.usedTranscriptionTimeInMilliSec) + (audioDurationInSec * 1000 )>
+      (data.totalTranscriptionTimeInMilliSec + 60000)
     ) {
       throw new Error("");
     }
@@ -127,6 +131,7 @@ const convertTextToLinkedinContent = async (req, res) => {
 
 async function enhanceText(req, res) {
   try {
+    console.log("req.body.uid==>",req.body.uid)
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -138,18 +143,20 @@ async function enhanceText(req, res) {
       ],
       store: true,
     });
-    doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
+    console.log("doc==>",doc)
+    doc.usedTextEnhanceCount = (doc.usedTextEnhanceCount + 1);
     const data = await doc.save();
+    console.log("doc==>2",doc,data)
     res.send(
       JSON.stringify({
         response: completion.choices[0].message.content,
-        Used_Text_Enhance_Times: data.usedTextEnhanceCount,
-        Total_Text_Enhance_Times: data.totalTextEnhanceCount,
+        usedEnhanceTextCount: data.usedTextEnhanceCount,
+        totalEnhanceTextCount: data.totalTextEnhanceCount,
       })
     );
   } catch (e) {
     console.log("e==>", e, e.message);
-    res.status(500).send(JSON.stringify("Internal server error"));
+    res.status(500).send(JSON.stringify(""));
   }
 }
 

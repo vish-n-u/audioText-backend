@@ -1,7 +1,10 @@
 const mongoose = require("mongoose")
 
 const userSchema =new  mongoose.Schema({
-    userId:String,
+    userId:{
+        type:String,
+        unique:true
+    },
 },{
     timestamps:true
 })
