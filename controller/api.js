@@ -31,7 +31,7 @@ const createUser = async (req, res) => {
       usedTranscriptionTimeInMilliSec: "0",
       totalTranscriptionTimeInMilliSec: minToMillSecInString(5),
       linkedinTextConversionCount: 0,
-      totalLinkedinTextConversionCount: 3,
+      totalLinkedinTextConversionCount: 10,
       usedTextEnhanceCount: 0,
       totalTextEnhanceCount: 10,
     });
@@ -110,6 +110,7 @@ const audioTranscription = async (req, res) => {
 
 const convertTextToLinkedinContent = async (req, res) => {
   try {
+    let doc = await UserDataModel.findOne({ userId: req.body.uid });
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -120,9 +121,19 @@ const convertTextToLinkedinContent = async (req, res) => {
       ],
       store: true,
     });
+    console.log("doc==>",doc)
+    doc.linkedinTextConversionCount = (doc.linkedinTextConversionCount+1)
+    const data = await doc.save()
 
     console.log(completion.choices[0].message.content);
-    res.status(200).send(JSON.stringify(completion.choices[0].message.content));
+    res.status(200).send(
+      JSON.stringify(
+       {
+         response: completion.choices[0].message.content,
+        linkedinTextConversionCount: data.linkedinTextConversionCount,
+        totalLinkedinTextConversionCount: data.totalLinkedinTextConversionCount}
+      )
+    )
   } catch (e) {
     console.log("e==>", e, e.message);
     res.status(500).send(JSON.stringify("Internal server error"));
