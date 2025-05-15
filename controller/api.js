@@ -2,6 +2,7 @@ const UserModel = require("../model/User");
 const UserDataModel = require("../model/UserData");
 const speech = require("@google-cloud/speech");
 const WavDecoder = require("wav-decoder");
+const admin = require('firebase-admin');
 
 const fs = require("fs");
 const OpenAI = require("openai");

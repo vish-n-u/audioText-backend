@@ -1,8 +1,10 @@
 const UserModel = require("../model/User")
+const admin = require('firebase-admin');
 
 
 const doesUserExist = async(req,res,next)=>{
     try{
+         const file = req.file
         console.log("req.body.uid==>",req.body.uid)
         let user = UserModel.findById(req.body.uid)
         if(!user){
@@ -11,11 +13,30 @@ const doesUserExist = async(req,res,next)=>{
         next()
     }
     catch(e){
+         if(file) fs.unlinkSync(file.path);
       return  res.status(500).send(JSON.stringify("Internal server Error"));
     }
 }
 
 
+const verifyAppCheck = async (req, res, next) => {
+    const file = req.file
+  const appCheckToken = req.header('X-Firebase-AppCheck');
+  if (!appCheckToken) return res.status(403).send('No App Check token');
+
+  try {
+    const appCheckClaims = await admin.appCheck().verifyToken(appCheckToken);
+    console.log('✅ AppCheck token verified', appCheckClaims);
+    next();
+  } catch (err) {
+    console.error('❌ Invalid AppCheck token', err);
+    if(file) fs.unlinkSync(file.path);
+    return res.status(403).send('App Check failed');
+  }
+};
+
+
 module.exports ={
-    doesUserExist
+    doesUserExist,
+    verifyAppCheck
 }

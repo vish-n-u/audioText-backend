@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 // Creates a client
 const client = new speech.SpeechClient();
+const admin = require('firebase-admin');
 const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -16,6 +17,10 @@ async function startApp() {
     let uri = process.env.mongodbConnect;
 
     console.log("uri==>", uri);
+
+admin.initializeApp({
+  credential: admin.credential.cert(require('./serviceKey.json')),
+});
 
     await mongoose.connect(uri);
 
