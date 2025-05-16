@@ -22,7 +22,10 @@ const doesUserExist = async(req,res,next)=>{
 const verifyAppCheck = async (req, res, next) => {
     const file = req.file
   const appCheckToken = req.header('X-Firebase-AppCheck');
-  if (!appCheckToken) return res.status(403).send('No App Check token');
+  
+  if (!appCheckToken){
+    console.log("No App Check token")
+    return res.status(403).send('No App Check token');}
 
   try {
     const appCheckClaims = await admin.appCheck().verifyToken(appCheckToken);

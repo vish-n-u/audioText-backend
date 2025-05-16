@@ -2,7 +2,7 @@ const UserModel = require("../model/User");
 const UserDataModel = require("../model/UserData");
 const speech = require("@google-cloud/speech");
 const WavDecoder = require("wav-decoder");
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 
 const fs = require("fs");
 const OpenAI = require("openai");
@@ -39,9 +39,9 @@ const createUser = async (req, res) => {
     console.log("User Created Successfully");
     return res.status(200).send(JSON.stringify("User Created Successfully"));
   } catch (e) {
-    console.log("e==>", e,e.errmsg,e.message);
-    if(e.errmsg.includes("duplicate key error")){
-      console.log("inside here")
+    console.log("e==>", e, e.errmsg, e.message);
+    if (e.errmsg.includes("duplicate key error")) {
+      console.log("inside here");
       return res.status(200).send(JSON.stringify("User Created Successfully"));
     }
     return res.status(500).send(JSON.stringify("Internal server Error"));
@@ -74,8 +74,8 @@ const audioTranscription = async (req, res) => {
     console.log("time==>", usedtime);
 
     if (
-      Number(data.usedTranscriptionTimeInMilliSec) + (audioDurationInSec * 1000 )>
-      (data.totalTranscriptionTimeInMilliSec + 60000)
+      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000 >
+      data.totalTranscriptionTimeInMilliSec + 60000
     ) {
       throw new Error("");
     }
@@ -113,28 +113,40 @@ const convertTextToLinkedinContent = async (req, res) => {
   try {
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         {
           role: "user",
-          content: `Based on this text :${req.body.text} provide me content that I can post on linkedin , add necessary hashtags and also just provide the content in unicode format so bolds and italics are retained that I can directly share`,
+          content: `
+Based on the following text, generate a LinkedIn-ready post. 
+- Write it as if it were written directly by a professional, with no introduction like "Certainly" or "Here's your post".
+- Start with the actual post content immediately.
+- Include relevant and trending hashtags where appropriate.
+- Preserve formatting (e.g. **bold**, *italics*) using Unicode characters that render correctly on LinkedIn.
+- Do NOT include any notes, explanations, or extra commentary—only return the final post content.
+
+Text:
+${req.body.text}
+      `.trim(),
         },
       ],
       store: true,
     });
-    console.log("doc==>",doc)
-    doc.linkedinTextConversionCount = (doc.linkedinTextConversionCount+1)
-    const data = await doc.save()
+
+    console.log("doc==>", doc);
+    console.log("text==>", req.body.text);
+    console.log("finalText==>", completion.choices[0].message.content);
+    doc.linkedinTextConversionCount = doc.linkedinTextConversionCount + 1;
+    const data = await doc.save();
 
     console.log(completion.choices[0].message.content);
     res.status(200).send(
-      JSON.stringify(
-       {
-         response: completion.choices[0].message.content,
+      JSON.stringify({
+        response: completion.choices[0].message.content,
         linkedinTextConversionCount: data.linkedinTextConversionCount,
-        totalLinkedinTextConversionCount: data.totalLinkedinTextConversionCount}
-      )
-    )
+        totalLinkedinTextConversionCount: data.totalLinkedinTextConversionCount,
+      })
+    );
   } catch (e) {
     console.log("e==>", e, e.message);
     res.status(500).send(JSON.stringify("Internal server error"));
@@ -143,22 +155,23 @@ const convertTextToLinkedinContent = async (req, res) => {
 
 async function enhanceText(req, res) {
   try {
-    console.log("req.body.uid==>",req.body.uid)
+    console.log("req.body.uid==>", req.body.uid);
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `Enhance the following text :${req.body.text} add necessary formatting and bulleting if required, this data is going to be used as notes by the user , just provide the actual content , dont add any prefix or suffix like "Sure this is your enhanced text" the content needs to be directly useable.`,
-        },
-      ],
-      store: true,
-    });
-    console.log("doc==>",doc)
-    doc.usedTextEnhanceCount = (doc.usedTextEnhanceCount + 1);
+   const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: `Improve the clarity, tone, and grammar of the following text. Do not add any formatting, bullet points, headings, or extra commentary. Return only the enhanced version of the text, ready to be used as clean, concise notes:\n\n${req.body.text}`,
+    },
+  ],
+  store: true,
+});
+
+    console.log("doc==>", doc);
+    doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
     const data = await doc.save();
-    console.log("doc==>2",doc,data)
+    console.log("doc==>2", doc, data);
     res.send(
       JSON.stringify({
         response: completion.choices[0].message.content,
@@ -197,5 +210,5 @@ module.exports = {
   createUser,
   audioTranscription,
   convertTextToLinkedinContent,
-  enhanceText
+  enhanceText,
 };
