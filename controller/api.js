@@ -90,10 +90,29 @@ const audioTranscription = async (req, res) => {
 
     fs.unlinkSync(file.path);
     console.log("response===>", response);
+    const formatData = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: `
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML
+Text:
+${response}
+      `.trim(),
+        },
+      ],
+      store: true,
+    });
+
+    
+
+
+    console.log("finalText==>", formatData.choices[0].message.content);
 
     res.send(
       JSON.stringify({
-        response,
+       response: formatData.choices[0].message.content,
         Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
         Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
       })
