@@ -105,14 +105,14 @@ ${response}
       store: true,
     });
 
-    
+
 
 
     console.log("finalText==>", formatData.choices[0].message.content);
 
     res.send(
       JSON.stringify({
-       response: formatData.choices[0].message.content,
+        response: formatData.choices[0].message.content,
         Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
         Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
       })
@@ -137,12 +137,16 @@ const convertTextToLinkedinContent = async (req, res) => {
         {
           role: "user",
           content: `
-Based on the following text, generate a LinkedIn-ready post. 
-- Write it as if it were written directly by a professional, with no introduction like "Certainly" or "Here's your post".
-- Start with the actual post content immediately.
-- Include relevant and trending hashtags where appropriate.
-- Preserve formatting (e.g. **bold**, *italics*) using Unicode characters that render correctly on LinkedIn.
-- Do NOT include any notes, explanations, or extra commentary—only return the final post content.
+Based on the following text, generate a LinkedIn-ready post.
+
+- Write it as if it were written directly by a professional (first person).
+- Start immediately with the post content — no introductions or framing.
+- Use **Unicode characters** from the Mathematical Alphanumeric Symbols block to represent formatting:
+  - Use bold text (e.g., 𝗧𝗵𝗶𝘀 𝗶𝘀 𝗯𝗼𝗹𝗱) using Unicode bold characters.
+  - Use italic text (e.g., 𝘛𝘩𝘪𝘴 𝘪𝘴 𝘪𝘵𝘢𝘭𝘪𝘤) using Unicode italic characters.
+  - Do NOT use Markdown (**bold**, *italics*) or HTML tags.
+- Include relevant and trending LinkedIn hashtags.
+- Output only the final post content. No explanations, comments, or additional notes.
 
 Text:
 ${req.body.text}
@@ -176,16 +180,16 @@ async function enhanceText(req, res) {
   try {
     console.log("req.body.uid==>", req.body.uid);
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
-   const completion = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [
-    {
-      role: "user",
-      content: `Improve the clarity, tone, and grammar of the following text. Do not add any formatting, bullet points, headings, or extra commentary. Return only the enhanced version of the text, ready to be used as clean, concise notes:\n\n${req.body.text}`,
-    },
-  ],
-  store: true,
-});
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: `Improve the clarity, tone, and grammar of the following text. Do not add any formatting, bullet points, headings, or extra commentary. Return only the enhanced version of the text, ready to be used as clean, concise notes:\n\n${req.body.text}`,
+        },
+      ],
+      store: true,
+    });
 
     console.log("doc==>", doc);
     doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
