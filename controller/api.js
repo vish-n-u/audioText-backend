@@ -96,7 +96,7 @@ const audioTranscription = async (req, res) => {
         {
           role: "user",
           content: `
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>,>li>,<ol> etc., to enhance readability and structure without changing any content or wording; output only valid HTML , stricly just provide the data dont start with ``html
 Text:
 ${response}
       `.trim(),
