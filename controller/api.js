@@ -140,13 +140,14 @@ const convertTextToLinkedinContent = async (req, res) => {
           content: `
 Based on the following text, generate a LinkedIn-ready post.
 
-- Write it as if it were written directly by a professional (first person).
-- Start immediately with the post content — no introductions or framing.
-- Use **Unicode characters** from the Mathematical Alphanumeric Symbols block to represent formatting:
-  - Use bold text (e.g., 𝗧𝗵𝗶𝘀 𝗶𝘀 𝗯𝗼𝗹𝗱) using Unicode bold characters.
-  - Use italic text (e.g., 𝘛𝘩𝘪𝘴 𝘪𝘴 𝘪𝘵𝘢𝘭𝘪𝘤) using Unicode italic characters.
-  - Do NOT use Markdown (**bold**, *italics*) or HTML tags.
-- Include relevant and trending LinkedIn hashtags.
+- Write it in a professional, first-person tone — as if I’m writing it myself.
+- Start immediately with the content. Do not include any introductions, comments, or headings like "Here’s your post."
+- Highlight **only the most important phrases** (such as key achievements, strong sentiments, or emphasis) using **Unicode characters**:
+  - Use bold Unicode characters (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀) for emphasis.
+  - Use italic Unicode characters (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴) sparingly for soft highlights or nuance.
+- Do **not** use Markdown (**bold**, *italic*) or HTML (`<b>`, `<i>`) — use only Unicode characters that render correctly on LinkedIn.
+- Include relevant and trending LinkedIn hashtags where appropriate.
+- Return only the final LinkedIn post content — no notes or extra explanation.
 - Output only the final post content. No explanations, comments, or additional notes.
 
 Text:
