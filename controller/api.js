@@ -2,6 +2,7 @@ const UserModel = require("../model/User");
 const UserDataModel = require("../model/UserData");
 const speech = require("@google-cloud/speech");
 const WavDecoder = require("wav-decoder");
+const nodemailer = require("nodemailer")
 const admin = require("firebase-admin");
 
 const fs = require("fs");
@@ -85,7 +86,6 @@ const audioTranscription = async (req, res) => {
       Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000
     );
     await data.save();
-    let text ="```html"
 
     //   const response = "Dummy Data"
 
@@ -97,7 +97,7 @@ const audioTranscription = async (req, res) => {
         {
           role: "user",
           content: `
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>,>li>,<ol> etc., to enhance readability and structure without changing any content or wording; output only valid HTML , stricly just provide the data dont start with ${text}
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML
 Text:
 ${response}
       `.trim(),
@@ -106,14 +106,14 @@ ${response}
       store: true,
     });
 
-
+    
 
 
     console.log("finalText==>", formatData.choices[0].message.content);
 
     res.send(
       JSON.stringify({
-        response: formatData.choices[0].message.content,
+       response: formatData.choices[0].message.content,
         Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
         Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
       })
@@ -138,17 +138,12 @@ const convertTextToLinkedinContent = async (req, res) => {
         {
           role: "user",
           content: `
-Based on the following text, generate a LinkedIn-ready post.
-
-- Write it in a professional, first-person tone — as if I’m writing it myself.
-- Start immediately with the content. Do not include any introductions, comments, or headings like "Here’s your post."
-- Highlight **only the most important phrases** (such as key achievements, strong sentiments, or emphasis) using **Unicode characters**:
-  - Use bold Unicode characters (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀) for emphasis.
-  - Use italic Unicode characters (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴) sparingly for soft highlights or nuance.
-- Do **not** use Markdown (**bold**, *italic*) or HTML (`<b>`, `<i>`) — use only Unicode characters that render correctly on LinkedIn.
-- Include relevant and trending LinkedIn hashtags where appropriate.
-- Return only the final LinkedIn post content — no notes or extra explanation.
-- Output only the final post content. No explanations, comments, or additional notes.
+Based on the following text, generate a LinkedIn-ready post. 
+- Write it as if it were written directly by a professional, with no introduction like "Certainly" or "Here's your post".
+- Start with the actual post content immediately.
+- Include relevant and trending hashtags where appropriate.
+- Preserve formatting (e.g. **bold**, *italics*) using Unicode characters that render correctly on LinkedIn.
+- Do NOT include any notes, explanations, or extra commentary—only return the final post content.
 
 Text:
 ${req.body.text}
@@ -182,16 +177,16 @@ async function enhanceText(req, res) {
   try {
     console.log("req.body.uid==>", req.body.uid);
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: `Improve the clarity, tone, and grammar of the following text. Do not add any formatting, bullet points, headings, or extra commentary. Return only the enhanced version of the text, ready to be used as clean, concise notes:\n\n${req.body.text}`,
-        },
-      ],
-      store: true,
-    });
+   const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: `Improve the clarity, tone, and grammar of the following text. Do not add any formatting, bullet points, headings, or extra commentary. Return only the enhanced version of the text, ready to be used as clean, concise notes:\n\n${req.body.text}`,
+    },
+  ],
+  store: true,
+});
 
     console.log("doc==>", doc);
     doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
@@ -231,9 +226,39 @@ function minToMillSecInString(min) {
   return `${value}`;
 }
 
+const increaseUsageLimit = async (req,res)=>{
+  try{
+  const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "ridescribenotes@gmail.com",
+    pass:process.env.gmailPassword,
+  },
+});
+ const info = await transporter.sendMail({
+    from: 'ridescribenotes@gmail.com',
+    to: "ridescribenotes@gmail.com",
+    subject: "Increase Limit",
+    text: req.body.text, // plain‑text body
+  });
+
+  transporter.sendMail(info)
+  return res.status(200).send("success")
+}
+catch(e){
+   console.log("e==>", e, e.message);
+    res.status(500).send(JSON.stringify(e.message));
+
+}
+}
+
 module.exports = {
   createUser,
   audioTranscription,
   convertTextToLinkedinContent,
   enhanceText,
+  increaseUsageLimit
 };

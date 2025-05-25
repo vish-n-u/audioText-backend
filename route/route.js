@@ -1,4 +1,4 @@
-const { createUser, audioTranscription, convertTextToLinkedinContent, enhanceText } = require("../controller/api");
+const { createUser, audioTranscription, convertTextToLinkedinContent, enhanceText ,increaseUsageLimit} = require("../controller/api");
 const { doesUserExist,verifyAppCheck } = require("../authentication/auth");
 const multer = require("multer");
 const path = require("path");
@@ -20,6 +20,7 @@ const routes = (app) => {
   app.post("/uploadFile", [ upload.single("file"),verifyAppCheck,doesUserExist], audioTranscription);
   app.post("/linkedinShareableText",[verifyAppCheck], convertTextToLinkedinContent);
   app.post("/enhanceText",[verifyAppCheck],enhanceText)
+  app.post("/increase",increaseUsageLimit)
 };
 
 module.exports = routes;
