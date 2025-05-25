@@ -52,45 +52,29 @@ const createUser = async (req, res) => {
 const audioTranscription = async (req, res) => {
   try {
     const file = req.file;
-    const outputPath = file.path;
-    let data;
-    let audioDurationInSec;
-    await readFile(file.path)
-      .then((buffer) => {
-        return WavDecoder.decode(buffer);
-      })
-      .then(async function (audioData) {
-        audioDurationInSec =
-          audioData.channelData[0].length / audioData.sampleRate;
-        let doc = await UserDataModel.findOne({ userId: req.body.uid });
-        data = await doc.save();
-      })
-      .catch((e) => {
-        console.log("e==>", e);
-        throw Error("");
-      });
-    let usedtime =
-      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
-    console.log("audioDurationInSec==>", audioDurationInSec);
-    console.log("time==>", usedtime);
-
-    if (
-      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000 >
-      data.totalTranscriptionTimeInMilliSec + 60000
-    ) {
-      throw new Error("");
+    if (!file || !file.path) {
+      return res.status(400).send({ response: "No file uploaded" });
     }
 
-    const response = await quickstart(outputPath);
-    data.usedTranscriptionTimeInMilliSec = String(
-      Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000
-    );
+    const buffer = await readFile(file.path);
+    const audioData = await WavDecoder.decode(buffer);
+
+    const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
+
+    const data = await UserDataModel.findOne({ userId: req.body.uid });
+    const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
+
+    if (newUsedTime > data.totalTranscriptionTimeInMilliSec) {
+      throw new Error("Transcription quota exceeded");
+    }
+
+    const response = await quickstart(file.path);
+
+    data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
 
-    //   const response = "Dummy Data"
-
     fs.unlinkSync(file.path);
-    console.log("response===>", response);
+
     const formatData = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -100,34 +84,25 @@ const audioTranscription = async (req, res) => {
 Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML
 Text:
 ${response}
-      `.trim(),
+        `.trim(),
         },
       ],
-      store: true,
     });
 
-    
-
-
-    console.log("finalText==>", formatData.choices[0].message.content);
-
-    res.send(
-      JSON.stringify({
-       response: formatData.choices[0].message.content,
-        Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
-        Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
-      })
-    );
+    res.send({
+      response: formatData.choices[0].message.content,
+      Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
+      Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
+    });
   } catch (e) {
-    console.log("e==>", e.message, e);
-    return res.status(500).send(
-      JSON.stringify({
-        response: "Internal server err",
-        Used_Transcription_Duration: -1,
-      })
-    );
+    console.error("Error in audioTranscription:", e.message || e);
+    return res.status(500).send({
+      response: "Internal server error",
+      Used_Transcription_Duration: -1,
+    });
   }
 };
+
 
 const convertTextToLinkedinContent = async (req, res) => {
   try {
@@ -242,7 +217,7 @@ const increaseUsageLimit = async (req,res)=>{
     from: 'ridescribenotes@gmail.com',
     to: "ridescribenotes@gmail.com",
     subject: "Increase Limit",
-    text: req.body.text, // plain‑text body
+    text: req.body.text,
   });
 
   return res.status(200).send(JSON.stringify("success"))
