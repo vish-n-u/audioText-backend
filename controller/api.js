@@ -246,7 +246,7 @@ const increaseUsageLimit = async (req,res)=>{
   });
 
   transporter.sendMail(info)
-  return res.status(200).send("success")
+  return res.status(200).send(JSON.stringify("success"))
 }
 catch(e){
    console.log("e==>", e, e.message);
