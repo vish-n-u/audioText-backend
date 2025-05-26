@@ -64,7 +64,7 @@ const audioTranscription = async (req, res) => {
     const data = await UserDataModel.findOne({ userId: req.body.uid });
     const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
 
-    if (newUsedTime > data.totalTranscriptionTimeInMilliSec || false) {
+    if (newUsedTime > data.totalTranscriptionTimeInMilliSec && false) {
       throw new Error("Transcription quota exceeded");
     }
 
