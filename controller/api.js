@@ -69,6 +69,7 @@ const audioTranscription = async (req, res) => {
     }
 
     const response = await quickstart(file.path);
+    let htmlKey = "```html"
 
     data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
@@ -81,7 +82,7 @@ const audioTranscription = async (req, res) => {
         {
           role: "user",
           content: `
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML and strictly dont start with ${htmlKey}
 Text:
 ${response}
         `.trim(),
@@ -113,13 +114,13 @@ const convertTextToLinkedinContent = async (req, res) => {
         {
           role: "user",
           content: `
-Based on the following text, generate a LinkedIn-ready post. 
-- Write it as if it were written directly by a professional, with no introduction like "Certainly" or "Here's your post".
-- Start with the actual post content immediately.
-- Include relevant and trending hashtags where appropriate.
-- Preserve formatting (e.g. **bold**, *italics*) using Unicode characters that render correctly on LinkedIn.
-- Do NOT include any notes, explanations, or extra commentary—only return the final post content.
+Based on the following text, generate a LinkedIn-ready post.
 
+- Do not include any commentary or explanations—only return the final post content.
+- Use full-width Unicode formatting:
+- Use Unicode Formatting of text to indicate bold and italics wherever it seems necessary.
+- No markdown or HTML should remain in the result.
+- Keep hashtags relevant and trending.
 Text:
 ${req.body.text}
       `.trim(),
