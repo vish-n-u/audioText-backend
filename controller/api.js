@@ -64,12 +64,11 @@ const audioTranscription = async (req, res) => {
     const data = await UserDataModel.findOne({ userId: req.body.uid });
     const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
 
-    if (newUsedTime > data.totalTranscriptionTimeInMilliSec && false) {
+    if (newUsedTime > data.totalTranscriptionTimeInMilliSec) {
       throw new Error("Transcription quota exceeded");
     }
 
     const response = await quickstart(file.path);
-    let htmlKey = "```html"
 
     data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
@@ -82,16 +81,24 @@ const audioTranscription = async (req, res) => {
         {
           role: "user",
           content: `
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure without changing any content or wording; output only valid HTML and strictly dont start with ${htmlKey}
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure.
+
+⚠️ Do not wrap the output in any markdown-style code blocks (like \`\`\`html). Just return plain raw HTML with no extra commentary.
+
 Text:
 ${response}
         `.trim(),
         },
       ],
     });
+let html = formatData.choices[0].message.content.trim();
 
+// Remove ```html and ``` if they exist
+if (html.startsWith("```html")) {
+  html = html.replace(/^```html/, "").replace(/```$/, "").trim();
+}
     res.send({
-      response: formatData.choices[0].message.content,
+      response:html,
       Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
       Total_Transcription_Duration: data.totalTranscriptionTimeInMilliSec,
     });
@@ -114,11 +121,11 @@ const convertTextToLinkedinContent = async (req, res) => {
         {
           role: "user",
           content: `
-Based on the following text, generate a LinkedIn-ready post.
-
+Based on the following text, generate a LinkedIn-ready post. 
 - Do not include any commentary or explanations—only return the final post content.
 - Use full-width Unicode formatting:
-- Use Unicode Formatting of text to indicate bold and italics wherever it seems necessary.
+  - Convert all text wrapped in **double asterisks** to Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀).
+  - Convert all text wrapped in *single asterisks* to Unicode italic (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴).
 - No markdown or HTML should remain in the result.
 - Keep hashtags relevant and trending.
 Text:
