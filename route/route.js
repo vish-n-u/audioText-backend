@@ -1,4 +1,4 @@
-const { createUser, audioTranscription, convertTextToLinkedinContent, enhanceText ,increaseUsageLimit} = require("../controller/api");
+const { createUser, audioTranscription, convertTextToLinkedinContent, enhanceText ,increaseUsageLimit, createDummyPaymentLink} = require("../controller/api");
 const { doesUserExist,verifyAppCheck } = require("../authentication/auth");
 const multer = require("multer");
 const path = require("path");
@@ -21,6 +21,7 @@ const routes = (app) => {
   app.post("/linkedinShareableText",[verifyAppCheck], convertTextToLinkedinContent);
   app.post("/enhanceText",[verifyAppCheck],enhanceText)
   app.post("/increase",increaseUsageLimit)
+  app.post("/dummyPaymentLink",createDummyPaymentLink)
 };
 
 module.exports = routes;

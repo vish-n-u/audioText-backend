@@ -237,10 +237,28 @@ catch(e){
 }
 }
 
+function createDummyPaymentLink(req,res) {
+  let {appointmentId, totalPrice, customerId} = req.body
+  const baseUrl = "https://dummy-payment.com/pay";
+
+  const queryParams = new URLSearchParams({
+    appointmentId: appointmentId,
+    amount: totalPrice,
+    customerId: customerId,
+    currency: "USD"
+  });
+
+  let url =  `${baseUrl}?${queryParams.toString()}`;
+
+  return res.status(200).send({paymetnLink:url})
+}
+
+
 module.exports = {
   createUser,
   audioTranscription,
   convertTextToLinkedinContent,
   enhanceText,
-  increaseUsageLimit
+  increaseUsageLimit,
+  createDummyPaymentLink
 };
