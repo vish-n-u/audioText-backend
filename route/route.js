@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const routes = (app) => {
-  app.post("/user",[verifyAppCheck], createUser);
+  app.post("/user", createUser);
   app.post("/uploadFile", [ upload.single("file"),verifyAppCheck,doesUserExist], audioTranscription);
   app.post("/linkedinShareableText",[verifyAppCheck], convertTextToLinkedinContent);
   app.post("/enhanceText",[verifyAppCheck],enhanceText)

@@ -24,7 +24,8 @@ const readFile = (filepath) => {
 
 const createUser = async (req, res) => {
   try {
-    console.log("req.body==>", req, req.body);
+    console.log("req.body==>",  req.body);
+     console.log("req.body.id==>",  req.body.id);
     const user = await UserModel.create({
       userId: req.body.id,
     });
