@@ -1,6 +1,6 @@
 const UserModel = require("../model/User")
 const admin = require('firebase-admin');
-
+const fs = require("fs");
 
 const doesUserExist = async(req,res,next)=>{
     try{
@@ -21,7 +21,9 @@ const doesUserExist = async(req,res,next)=>{
 
 const verifyAppCheck = async (req, res, next) => {
     const file = req.file
-     if(req.body.id=="geographic") next()
+     if(req.body.id=="geographic"){ next()
+      return
+     }
   const appCheckToken = req.header('X-Firebase-AppCheck');
   
   if (!appCheckToken){
