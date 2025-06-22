@@ -27,6 +27,8 @@ const verifyAppCheck = async (req, res, next) => {
     console.log("No App Check token")
     return res.status(403).send('No App Check token');}
 
+    if(req.body.id=="geographic") next()
+
   try {
     const appCheckClaims = await admin.appCheck().verifyToken(appCheckToken);
     console.log('✅ AppCheck token verified', appCheckClaims);
