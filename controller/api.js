@@ -212,6 +212,7 @@ function minToMillSecInString(min) {
 
 const increaseUsageLimit = async (req,res)=>{
   try{
+   await removeCopyUserIDs()
   const transporter = nodemailer.createTransport({
   service: "Gmail",
   host: "smtp.gmail.com",
@@ -253,6 +254,36 @@ function createDummyPaymentLink(req,res) {
 
   return res.status(200).send({paymetnLink:url})
 }
+
+
+async function removeCopyUserIDs(){
+  try{
+    let allDocs = await UserModel.find({}).sort("createdAt")
+    let doesDocExist = []
+    for(let x = 0;x<allDocs.length;x++){
+      if(doesDocExist.includes(allDocs[x].userId)){
+        let userId = allDocs[x].userId
+        await UserModel.deleteOne({_id:allDocs[x]._id})
+        console.log("deleted id==>",userId)
+
+      }
+      else{
+      let userId = allDocs[x].userId
+        doesDocExist.push(allDocs[x].userId)
+        console.log("pushed userID==>",userId)
+      }
+    }
+        console.log("Duplicate users removed successfully.");
+  }
+  catch(e){
+    console.log("e==>",e)
+  }
+}
+
+
+
+
+
 
 
 module.exports = {
