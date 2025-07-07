@@ -11,6 +11,7 @@ const openai = new OpenAI({
   apiKey: process.env.apiKey,
 });
 
+
 const readFile = (filepath) => {
   return new Promise((resolve, reject) => {
     fs.readFile(filepath, (err, buffer) => {
@@ -26,8 +27,10 @@ const createUser = async (req, res) => {
   try {
     console.log("req.body==>",  req.body);
      console.log("req.body.id==>",  req.body.id);
+     let formattedDateTime = returnFormattedCurrentDate()
     const user = await UserModel.create({
       userId: req.body.id,
+      date :formattedDateTime
     });
     await UserDataModel.create({
       userId: user.userId,
@@ -62,6 +65,25 @@ const audioTranscription = async (req, res) => {
 
     const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
 
+    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+
+    if(!doesUserExist){
+       let formattedDateTime = returnFormattedCurrentDate()
+      const user = await UserModel.create({
+      userId: req.body.id,
+      date :formattedDateTime
+    });
+    await UserDataModel.create({
+      userId: user.userId,
+      usedTranscriptionTimeInMilliSec: "0",
+      totalTranscriptionTimeInMilliSec: minToMillSecInString(5),
+      linkedinTextConversionCount: 0,
+      totalLinkedinTextConversionCount: 10,
+      usedTextEnhanceCount: 0,
+      totalTextEnhanceCount: 10,
+    });
+    }
+
     const data = await UserDataModel.findOne({ userId: req.body.uid });
     const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
 
@@ -82,7 +104,7 @@ const audioTranscription = async (req, res) => {
         {
           role: "user",
           content: `
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h1>–<h6>, <mark>, etc., to enhance readability and structure.
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability and structure.
 
 ⚠️ Do not wrap the output in any markdown-style code blocks (like \`\`\`html). Just return plain raw HTML with no extra commentary.
 
@@ -115,6 +137,25 @@ if (html.startsWith("```html")) {
 
 const convertTextToLinkedinContent = async (req, res) => {
   try {
+
+    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+
+    if(!doesUserExist){
+       let formattedDateTime = returnFormattedCurrentDate()
+      const user = await UserModel.create({
+      userId: req.body.id,
+      date :formattedDateTime
+    });
+    await UserDataModel.create({
+      userId: user.userId,
+      usedTranscriptionTimeInMilliSec: "0",
+      totalTranscriptionTimeInMilliSec: minToMillSecInString(5),
+      linkedinTextConversionCount: 0,
+      totalLinkedinTextConversionCount: 10,
+      usedTextEnhanceCount: 0,
+      totalTextEnhanceCount: 10,
+    });
+    }
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -159,6 +200,24 @@ ${req.body.text}
 
 async function enhanceText(req, res) {
   try {
+    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+
+    if(!doesUserExist){
+       let formattedDateTime = returnFormattedCurrentDate()
+      const user = await UserModel.create({
+      userId: req.body.id,
+      date :formattedDateTime
+    });
+    await UserDataModel.create({
+      userId: user.userId,
+      usedTranscriptionTimeInMilliSec: "0",
+      totalTranscriptionTimeInMilliSec: minToMillSecInString(5),
+      linkedinTextConversionCount: 0,
+      totalLinkedinTextConversionCount: 10,
+      usedTextEnhanceCount: 0,
+      totalTextEnhanceCount: 10,
+    });
+    }
     console.log("req.body.uid==>", req.body.uid);
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
    const completion = await openai.chat.completions.create({
@@ -172,13 +231,31 @@ async function enhanceText(req, res) {
   store: true,
 });
 
+const formattedCompletion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: content: `
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability and structure.
+
+⚠️ Do not wrap the output in any markdown-style code blocks (like \`\`\`html). Just return plain raw HTML with no extra commentary.
+
+Text:
+${completion.choices[0].message.content}
+        `.trim(),,
+    },
+  ],
+  store: true,
+});
+
     console.log("doc==>", doc);
     doc.usedTextEnhanceCount = doc.usedTextEnhanceCount + 1;
     const data = await doc.save();
     console.log("doc==>2", doc, data);
     res.send(
       JSON.stringify({
-        response: completion.choices[0].message.content,
+        response: formattedCompletion.choices[0].message.content,
         usedEnhanceTextCount: data.usedTextEnhanceCount,
         totalEnhanceTextCount: data.totalTextEnhanceCount,
       })
@@ -294,3 +371,23 @@ module.exports = {
   increaseUsageLimit,
   createDummyPaymentLink
 };
+
+
+
+function returnFormattedCurrentDate(){
+  const now = new Date();
+
+// Get date components
+const year = now.getFullYear();
+const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+const day = String(now.getDate()).padStart(2, '0');
+
+// Get time components
+const hours = String(now.getHours()).padStart(2, '0');
+const minutes = String(now.getMinutes()).padStart(2, '0');
+const seconds = String(now.getSeconds()).padStart(2, '0');
+
+// Example format: YYYY-MM-DD HH:MM:SS
+const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+return formattedDateTime
+}
