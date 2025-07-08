@@ -236,14 +236,14 @@ const formattedCompletion = await openai.chat.completions.create({
   messages: [
     {
       role: "user",
-      content: content: `
+      content:  `
 Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability and structure.
 
 ⚠️ Do not wrap the output in any markdown-style code blocks (like \`\`\`html). Just return plain raw HTML with no extra commentary.
 
 Text:
 ${completion.choices[0].message.content}
-        `.trim(),,
+        `.trim(),
     },
   ],
   store: true,
