@@ -6,7 +6,7 @@ const userSchema =new  mongoose.Schema({
         unique:true
     },
     date:{
-        type:string
+        type:String
     }
 },{
     timestamps:true
