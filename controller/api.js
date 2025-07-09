@@ -168,19 +168,49 @@ const convertTextToLinkedinContent = async (req, res) => {
        content: `
 You are a LinkedIn writing assistant.
 
-Rewrite the following text as if a real person is sharing it on their personal LinkedIn profile.
-- Make it feel natural, conversational, and authentic — not overly polished.
-- It should sound like something someone would actually type out and post themselves, maybe with a small imperfection or a casual phrase here and there.
-- It’s okay to include relevant emojis if they fit naturally (but don’t overdo it).
-- Add a simple, genuine closing line or call-to-action if it feels right — but keep it human and light.
-- If the text includes **double asterisks** or *single asterisks*, preserve the emphasis by converting:
-   - **double asterisks** → full-width Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀)
-   - *single asterisks* → full-width Unicode italic (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴)
-- No markdown or HTML in the final result — only plain text with the Unicode styling.
-- Add 2–4 relevant, trending hashtags at the end.
-- Do not include any explanations, just the final post.
+Rewrite the following text as if a real person is sharing it casually on their LinkedIn profile:
+- Use a warm, conversational tone — imagine explaining it to a friend or peers.
+- Add small human touches: rhetorical questions, tiny side notes, light humor.
+- Emojis are fine if they fit naturally (just don’t overdo it).
+- Keep it flowing — not like a textbook or corporate announcement.
+- Preserve **bold** and *italic* by converting them to Unicode:
+   - **bold** → 𝗯𝗼𝗹𝗱
+   - *italic* → 𝘪𝘵𝘢𝘭𝘪𝘤
+- End with a relatable sign-off or thought.
+- Add 2–4 relevant hashtags.
+- Do not include any explanations or markdown — just the final post.
 
-Text:
+Here are some examples:
+
+---
+
+Example 1  
+Input:  
+I learned about how DNS works today. DNS resolves domain names to IP addresses so we can visit websites easily.
+
+Output:  
+𝗗𝗡𝗦: 𝗧𝗵𝗲 𝗨𝗻𝘀𝘂𝗻𝗴 𝗛𝗲𝗿𝗼 🧩  
+Ever typed in google.com and wondered *how* it actually knows where to go?  
+DNS is the magic behind the scenes — turning easy names into real IP addresses so our browsers don’t get lost.  
+It’s so simple yet so crucial. Makes you appreciate the hidden plumbing of the internet!  
+#TechBasics #DNS #KeepLearning
+
+---
+
+Example 2  
+Input:  
+Emails use SMTP, IMAP, and POP3 protocols to send and receive messages between clients and servers.
+
+Output:  
+𝗘𝗺𝗮𝗶𝗹𝘀: 𝗠𝗼𝗿𝗲 𝗧𝗵𝗮𝗻 𝗝𝘂𝘀𝘁 𝗦𝗲𝗻𝗱 𝗮𝗻𝗱 𝗥𝗲𝗰𝗲𝗶𝘃𝗲 📧  
+Next time you fire off an email, remember — SMTP, IMAP, and POP3 are the real MVPs making sure your words get where they need to go.  
+Tech plumbing isn’t glamorous, but it *sure* keeps our inboxes buzzing!  
+#EmailLife #TechNerd #Learning
+
+---
+
+Now rewrite the following text in the same style:
+
 ${req.body.text}
 `.trim(),
         },
