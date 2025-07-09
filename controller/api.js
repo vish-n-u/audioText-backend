@@ -165,18 +165,22 @@ const convertTextToLinkedinContent = async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `
-Based on the following text, generate a LinkedIn-ready post. 
-- Try to understand the intent of the text and why and how an individual will post it on their personal linkedin profile.
-- Do not include any commentary or explanations—only return the final post content.
-- Use full-width Unicode formatting:
-  - Convert all text wrapped in **double asterisks** to Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀).
-  - Convert all text wrapped in *single asterisks* to Unicode italic (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴).
-- No markdown or HTML should remain in the result.
-- Keep hashtags relevant and trending.
+         content: `You are a LinkedIn copywriting assistant.
+
+Rewrite the following text as if an individual is writing it *personally* to share on their LinkedIn profile.
+- Make it sound authentic, engaging, and relatable, as if they are sharing their own thoughts or experiences with their professional network.
+- Use a natural, conversational tone suitable for LinkedIn.
+- Add a short, strong closing line or call-to-action if it fits.
+- If the text already contains **bold** or *italic* emphasis, preserve it by converting:
+   - **double asterisks** → full-width Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀)
+   - *single asterisks* → full-width Unicode italic (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴)
+- Do not include any markdown or HTML in the final result — only plain text with the Unicode styling.
+- Add 2–4 relevant, trending hashtags at the end.
+- Do not include any extra commentary or explanations.
+
 Text:
 ${req.body.text}
-      `.trim(),
+`.trim(),
         },
       ],
       store: true,
