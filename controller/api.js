@@ -99,21 +99,24 @@ const audioTranscription = async (req, res) => {
     fs.unlinkSync(file.path);
 
     const formatData = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: `
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: `
 Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability and structure.
 
-⚠️ Do not wrap the output in any markdown-style code blocks (like \`\`\`html). Just return plain raw HTML with no extra commentary.
+If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'.
+
+⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
 
 Text:
 ${response}
-        `.trim(),
-        },
-      ],
-    });
+      `.trim(),
+    },
+  ],
+});
+
 let html = formatData.choices[0].message.content.trim();
 
 // Remove ```html and ``` if they exist
@@ -164,6 +167,7 @@ const convertTextToLinkedinContent = async (req, res) => {
           role: "user",
           content: `
 Based on the following text, generate a LinkedIn-ready post. 
+- Try to understand the intent of the text and why and how an individual will post it on their personal linkedin profile.
 - Do not include any commentary or explanations—only return the final post content.
 - Use full-width Unicode formatting:
   - Convert all text wrapped in **double asterisks** to Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀).
