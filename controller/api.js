@@ -165,18 +165,20 @@ const convertTextToLinkedinContent = async (req, res) => {
       messages: [
         {
           role: "user",
-         content: `You are a LinkedIn copywriting assistant.
+       content: `
+You are a LinkedIn writing assistant.
 
-Rewrite the following text as if an individual is writing it *personally* to share on their LinkedIn profile.
-- Make it sound authentic, engaging, and relatable, as if they are sharing their own thoughts or experiences with their professional network.
-- Use a natural, conversational tone suitable for LinkedIn.
-- Add a short, strong closing line or call-to-action if it fits.
-- If the text already contains **bold** or *italic* emphasis, preserve it by converting:
+Rewrite the following text as if a real person is sharing it on their personal LinkedIn profile.
+- Make it feel natural, conversational, and authentic — not overly polished.
+- It should sound like something someone would actually type out and post themselves, maybe with a small imperfection or a casual phrase here and there.
+- It’s okay to include relevant emojis if they fit naturally (but don’t overdo it).
+- Add a simple, genuine closing line or call-to-action if it feels right — but keep it human and light.
+- If the text includes **double asterisks** or *single asterisks*, preserve the emphasis by converting:
    - **double asterisks** → full-width Unicode bold (𝗹𝗶𝗸𝗲 𝘁𝗵𝗶𝘀)
    - *single asterisks* → full-width Unicode italic (𝘭𝘪𝘬𝘦 𝘵𝘩𝘪𝘴)
-- Do not include any markdown or HTML in the final result — only plain text with the Unicode styling.
+- No markdown or HTML in the final result — only plain text with the Unicode styling.
 - Add 2–4 relevant, trending hashtags at the end.
-- Do not include any extra commentary or explanations.
+- Do not include any explanations, just the final post.
 
 Text:
 ${req.body.text}
