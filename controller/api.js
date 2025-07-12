@@ -70,7 +70,7 @@ const audioTranscription = async (req, res) => {
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
       const user = await UserModel.create({
-      userId: req.body.id,
+      userId: req.body.uid,
       date :formattedDateTime
     });
     await UserDataModel.create({
@@ -146,7 +146,7 @@ const convertTextToLinkedinContent = async (req, res) => {
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
       const user = await UserModel.create({
-      userId: req.body.id,
+      userId: req.body.uid,
       date :formattedDateTime
     });
     await UserDataModel.create({
@@ -245,7 +245,7 @@ async function enhanceText(req, res) {
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
       const user = await UserModel.create({
-      userId: req.body.id,
+      userId: req.body.uid,
       date :formattedDateTime
     });
     await UserDataModel.create({
