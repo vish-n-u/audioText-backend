@@ -65,7 +65,7 @@ const audioTranscription = async (req, res) => {
 
     const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
 
-    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+    let doesUserExist = await UserModel.findOne({userId:req.body.uid})
 
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
@@ -141,7 +141,7 @@ if (html.startsWith("```html")) {
 const convertTextToLinkedinContent = async (req, res) => {
   try {
 
-    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+    let doesUserExist = await UserModel.findOne({userId:req.body.uid})
     console.log("doesUserExist==>",doesUserExist)
 
     if(!doesUserExist){
@@ -248,7 +248,7 @@ ${req.body.text}
 
 async function enhanceText(req, res) {
   try {
-    let doesUserExist = await UserModel.findOne({userId:req.body.id})
+    let doesUserExist = await UserModel.findOne({userId:req.body.uid})
 
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
