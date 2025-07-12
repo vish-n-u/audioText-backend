@@ -142,6 +142,14 @@ const convertTextToLinkedinContent = async (req, res) => {
   try {
 
     let doesUserExist = await UserModel.findOne({userId:req.body.id})
+    console.log("doesUserExist==>",doesUserExist)
+
+    if(!doesUserExist){
+      console.log("user does not exist")
+    }
+     if(doesUserExist){
+      console.log("user does exist")
+    }
 
     if(!doesUserExist){
        let formattedDateTime = returnFormattedCurrentDate()
