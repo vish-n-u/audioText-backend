@@ -168,12 +168,12 @@ const convertTextToLinkedinContent = async (req, res) => {
     });
     }
     let doc = await UserDataModel.findOne({ userId: req.body.uid });
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-       content: `
+   const completion = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: `
 You are a LinkedIn writing assistant.
 
 Rewrite the following text as if a real person is sharing it casually on their LinkedIn profile:
@@ -181,6 +181,7 @@ Rewrite the following text as if a real person is sharing it casually on their L
 - Add small human touches: rhetorical questions, tiny side notes, light humor.
 - Emojis are fine if they fit naturally (just don’t overdo it).
 - Keep it flowing — not like a textbook or corporate announcement.
+- If it fits, open with something like “I was recently reading an article…” or “I came across this…” to make it feel personal.
 - Preserve **bold** and *italic* by converting them to Unicode:
    - **bold** → 𝗯𝗼𝗹𝗱
    - *italic* → 𝘪𝘵𝘢𝘭𝘪𝘤
@@ -197,11 +198,11 @@ Input:
 I learned about how DNS works today. DNS resolves domain names to IP addresses so we can visit websites easily.
 
 Output:  
-𝗗𝗡𝗦: 𝗧𝗵𝗲 𝗨𝗻𝘀𝘂𝗻𝗴 𝗛𝗲𝗿𝗼 🧩  
-Ever typed in google.com and wondered *how* it actually knows where to go?  
-DNS is the magic behind the scenes — turning easy names into real IP addresses so our browsers don’t get lost.  
-It’s so simple yet so crucial. Makes you appreciate the hidden plumbing of the internet!  
-#TechBasics #DNS #KeepLearning
+I was recently reading an article about 𝗗𝗡𝗦 — the unsung hero of the internet 🧩  
+Ever typed in google.com and wondered *how* your browser knows where to go?  
+Turns out, DNS quietly does the job of turning easy names into real IP addresses so we don’t have to memorize random numbers.  
+It’s these tiny pieces that keep the web running smoothly — kind of cool, right?  
+#TechBasics #DNS #CuriousMinds
 
 ---
 
@@ -210,10 +211,10 @@ Input:
 Emails use SMTP, IMAP, and POP3 protocols to send and receive messages between clients and servers.
 
 Output:  
-𝗘𝗺𝗮𝗶𝗹𝘀: 𝗠𝗼𝗿𝗲 𝗧𝗵𝗮𝗻 𝗝𝘂𝘀𝘁 𝗦𝗲𝗻𝗱 𝗮𝗻𝗱 𝗥𝗲𝗰𝗲𝗶𝘃𝗲 📧  
-Next time you fire off an email, remember — SMTP, IMAP, and POP3 are the real MVPs making sure your words get where they need to go.  
-Tech plumbing isn’t glamorous, but it *sure* keeps our inboxes buzzing!  
-#EmailLife #TechNerd #Learning
+I came across this fun fact about emails today 📧  
+Apparently, every time we hit “send”, SMTP, IMAP, and POP3 are working behind the scenes making sure our messages get where they need to go — no drama, no fuss.  
+It’s like digital mailmen working 24/7 (and they never lose a package… hopefully).  
+#EmailLife #TechNerd #Learning #EverydayTech
 
 ---
 
@@ -221,10 +222,11 @@ Now rewrite the following text in the same style:
 
 ${req.body.text}
 `.trim(),
-        },
-      ],
-      store: true,
-    });
+    },
+  ],
+  store: true,
+});
+
 
     console.log("doc==>", doc);
     console.log("text==>", req.body.text);
