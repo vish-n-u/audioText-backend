@@ -96,6 +96,8 @@ const audioTranscription = async (req, res) => {
 
     const response = await quickstart(file.path);
 
+    console.log("transcription==>",response)
+
     data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
 
@@ -132,6 +134,8 @@ ${response}
   ], 
 });
 
+
+console.log("formatData==>",formatData)
 
 let html = formatData.choices[0].message.content.trim();
 
