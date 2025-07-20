@@ -58,7 +58,10 @@ const audioTranscription = async (req, res) => {
     const file = req.file;
     if (!file || !file.path) {
       return res.status(400).send({ response: "No file uploaded" });
+
     }
+
+    console.log("reached here==>")
 
     const buffer = await readFile(file.path);
     const audioData = await WavDecoder.decode(buffer);
@@ -108,6 +111,11 @@ Format the following plain text into clean, structured HTML using appropriate ta
 
 If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'.
 
+Additionally, if the text includes:
+'filename starts "123456789" filename ends'
+then replace this entire part with:
+<img src="/storage/emulated/0/Android/data/com.myapp.notera/files/ImageDirectory/123456789" />
+
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
 
 Text:
@@ -116,6 +124,7 @@ ${response}
     },
   ],
 });
+
 
 let html = formatData.choices[0].message.content.trim();
 
