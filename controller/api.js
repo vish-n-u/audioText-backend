@@ -113,17 +113,16 @@ Format the following plain text into clean, structured HTML using appropriate ta
  
 If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'. 
  
-Additionally, look for any text pattern that follows this format: 
-"filename starts [NUMBERS] filename ends" 
+Additionally, look for any text pattern that follows this format or something very similar: 
+"Add image file here xx" 
  
 When you find this pattern, replace the entire phrase with: 
-<img src="/storage/emulated/0/Android/data/com.myapp.notera/files/ImageDirectory/[NUMBERS]" /> 
+<img src=""/> 
  
-Where [NUMBERS] is the actual numeric filename found between "filename starts" and "filename ends". 
+
  
 Examples: 
-- "filename starts 123456789 filename ends" becomes <img src="/storage/emulated/0/Android/data/com.myapp.notera/files/ImageDirectory/123456789" /> 
-- "filename starts 987654321 filename ends" becomes <img src="/storage/emulated/0/Android/data/com.myapp.notera/files/ImageDirectory/987654321" /> 
+- "Add image file here xx" becomes <img src=""/> 
  
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary. 
  
