@@ -100,6 +100,7 @@ const audioTranscription = async (req, res) => {
 
     data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
+    console.log("filename==>",file.path)
 
     fs.unlinkSync(file.path);
 
