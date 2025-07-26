@@ -114,7 +114,7 @@ Format the following plain text into clean, structured HTML using appropriate ta
 If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'. 
  
 Additionally, look for any text pattern that follows this format or something very similar: 
-"Add image file here xx" 
+"Insert image file here xx" 
  
 When you find this pattern, replace the entire phrase with: 
 <img src=""/> 
@@ -122,7 +122,7 @@ When you find this pattern, replace the entire phrase with:
 
  
 Examples: 
-- "Add image file here xx" becomes <img src=""/> 
+- "Insert image file here xx" becomes <img src=""/> 
  
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary. 
  
