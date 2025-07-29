@@ -104,35 +104,36 @@ const audioTranscription = async (req, res) => {
 
     fs.unlinkSync(file.path);
 
-const formatData = await openai.chat.completions.create({ 
-  model: "gpt-4o", 
-  messages: [ 
-    { 
-      role: "user", 
-      content: ` 
-Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability and structure. 
- 
-If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'. 
- 
-Additionally, look for any text pattern that follows this format or something very similar: 
-"Insert image file here xx" 
- 
-When you find this pattern, replace the entire phrase with: 
-<img src=""/> 
- 
+const formatData = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: `
+Format the following plain text into clean, structured HTML using appropriate tags like <p>, <br>, <strong>, <em>, <h4>–<h6>, <mark>, etc., to enhance readability **and preserve the natural spoken emphasis**.
 
- 
-Examples: 
-- "Insert image file here xx" becomes <img src=""/> 
- 
-⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary. 
- 
-Text: 
-${response} 
-      `.trim(), 
-    }, 
-  ], 
+If any parts of the text sound emotional, stressed, or strongly expressed, wrap them in <strong> or <em> tags to show emphasis. Use <mark> if something should stand out dramatically.
+
+If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'.
+
+Additionally, look for any text pattern that follows this format or something very similar:
+"Insert image file here xx"
+
+When you find this pattern, replace the entire phrase with:
+<img src=""/>
+
+Examples:
+- "Insert image file here xx" becomes <img src=""/>
+
+⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
+
+Text:
+${response}
+      `.trim(),
+    },
+  ],
 });
+
 
 
 console.log("formatData==>",formatData)
