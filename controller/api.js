@@ -64,9 +64,9 @@ const audioTranscription = async (req, res) => {
     console.log("reached here==>")
 
     const buffer = await readFile(file.path);
-    const audioData = await WavDecoder.decode(buffer);
+    // const audioData = await WavDecoder.decode(buffer);
 
-    const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
+    // const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
 
     let doesUserExist = await UserModel.findOne({userId:req.body.uid})
 
@@ -88,7 +88,7 @@ const audioTranscription = async (req, res) => {
     }
 
     const data = await UserDataModel.findOne({ userId: req.body.uid });
-    const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + audioDurationInSec * 1000;
+    const newUsedTime = Number(data.usedTranscriptionTimeInMilliSec) + 60 * 1000;
 
     if (newUsedTime > data.totalTranscriptionTimeInMilliSec && false) {
       throw new Error("Transcription quota exceeded");
