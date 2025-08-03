@@ -60,7 +60,8 @@ const audioTranscription = async (req, res) => {
       return res.status(400).send({ response: "No file uploaded" });
 
     }
-    const timestamps = req.timestamps
+    const timestamps = req.timestamps || req.body.timestamps
+    console.log("req.body==>",req.body)
     console.log("timestamps==>",timestamps)
 
     console.log("reached here==>")
@@ -104,7 +105,7 @@ const audioTranscription = async (req, res) => {
     await data.save();
     console.log("filename==>",file.path)
 
-    // fs.unlinkSync(file.path);
+    fs.unlinkSync(file.path);
 
 const formatData = await openai.chat.completions.create({
   model: "gpt-4o",
