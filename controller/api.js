@@ -102,7 +102,7 @@ const audioTranscription = async (req, res) => {
     await data.save();
     console.log("filename==>",file.path)
 
-    fs.unlinkSync(file.path);
+    // fs.unlinkSync(file.path);
 
 const formatData = await openai.chat.completions.create({
   model: "gpt-4o",
@@ -136,7 +136,7 @@ ${response}
 
 
 
-console.log("formatData==>",formatData)
+console.log("formatData==>",formatData.choices[0].message.content.trim())
 
 let html = formatData.choices[0].message.content.trim();
 
