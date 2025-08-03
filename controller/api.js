@@ -60,6 +60,8 @@ const audioTranscription = async (req, res) => {
       return res.status(400).send({ response: "No file uploaded" });
 
     }
+    const timeStamps = req.timeStamps
+    console.log("timeStamps==>",timeStamps)
 
     console.log("reached here==>")
 
