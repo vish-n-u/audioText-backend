@@ -4,7 +4,7 @@ const speech = require("@google-cloud/speech");
 const WavDecoder = require("wav-decoder");
 const nodemailer = require("nodemailer")
 const admin = require("firebase-admin");
-
+const ffmpeg = require("fluent-ffmpeg") 
 const fs = require("fs");
 const OpenAI = require("openai");
 const openai = new OpenAI({
@@ -60,9 +60,25 @@ const audioTranscription = async (req, res) => {
       return res.status(400).send({ response: "No file uploaded" });
 
     }
-    const timestamps = req.timestamps || req.body.timestamps
-    console.log("req.body==>",req.body)
-    console.log("timestamps==>",timestamps)
+     let timestampsRaw = req.timestamps || req.body.timestamps;
+    console.log("[audioTranscription] ✅ Raw timestamps:", timestampsRaw);
+
+    let timestampsInMs = [];
+
+    if (timestampsRaw&&timestampsRaw !== "null") {
+      timestampsInMs = timestampsRaw
+        .split(",")
+        .map((elem) => elem.trim())
+        .filter((elem) => elem && elem !== "null")
+        .map((sec) => Number(sec) * 1000)
+        .filter((ms) => !isNaN(ms))
+        .sort((a, b) => a - b);
+
+      console.log("[audioTranscription] ✅ Timestamps in ms:", timestampsInMs);
+    } else {
+      console.log("[audioTranscription] ⚠️ No timestamps provided");
+    }
+   
 
     console.log("reached here==>")
 
@@ -97,7 +113,89 @@ const audioTranscription = async (req, res) => {
       throw new Error("Transcription quota exceeded");
     }
 
-    const response = await quickstart(file.path);
+    console.log("[audioTranscription] 🎬 Starting FFmpeg splitting...");
+
+    const inputPath = file.path;
+    const outputChunks = [];
+    const splitPoints = timestampsInMs;
+
+    const points = [0, ...splitPoints];
+    const chunkPairs = [];
+
+    for (let i = 0; i < points.length; i++) {
+      const startMs = points[i];
+      const endMs = points[i + 1] || null; // null = end
+      chunkPairs.push({ startMs, endMs });
+    }
+
+    console.log("[audioTranscription] 📌 Split pairs:", chunkPairs);
+
+    const outputDir = path.join(process.cwd(), "chunks");
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir);
+    }
+
+    // 🔹 Promise all splits in series (these must run in sequence, but you could parallelize with caution)
+    for (let i = 0; i < chunkPairs.length; i++) {
+      const { startMs, endMs } = chunkPairs[i];
+      const outputPath = path.join(outputDir, `chunk_${i + 1}.mp3`);
+
+      await new Promise((resolve, reject) => {
+        let cmd = ffmpeg(inputPath)
+          .setStartTime(startMs / 1000);
+
+        if (endMs) {
+          const durationSec = (endMs - startMs) / 1000;
+          cmd = cmd.setDuration(durationSec);
+        }
+
+        cmd
+          .output(outputPath)
+          .on("end", () => {
+            console.log(`[audioTranscription] ✅ Created ${outputPath}`);
+            outputChunks.push(outputPath);
+            resolve();
+          })
+          .on("error", (err) => {
+            console.error(`[audioTranscription] ❌ FFmpeg error: ${err}`);
+            reject(err);
+          })
+          .run();
+      });
+    }
+
+    console.log("[audioTranscription] ✅ All chunks created:", outputChunks);
+
+    // 4️⃣ Transcribe all chunks concurrently
+    console.log("[audioTranscription] ⚡ Transcribing chunks in parallel...");
+
+    const transcriptionPromises = outputChunks.map((chunkPath, idx) => {
+      console.log(`[audioTranscription] 🚀 Queued transcription for chunk ${idx + 1}`);
+      return quickstart(chunkPath);
+    });
+
+    const transcripts = await Promise.all(transcriptionPromises);
+
+    console.log("[audioTranscription] ✅ All chunk transcripts received:", transcripts);
+
+    // 5️⃣ Clean up chunk files in parallel
+    outputChunks.forEach((chunkPath) => {
+      try {
+        fs.unlinkSync(chunkPath);
+      } catch (e) {
+        console.warn(`[audioTranscription] ⚠️ Could not delete chunk: ${chunkPath}`);
+      }
+    });
+
+    // 6️⃣ Stitch text + images
+    let finalNote = "";
+    for (let i = 0; i < transcripts.length; i++) {
+      finalNote += transcripts[i] + "\n";
+      if (i < splitPoints.length) {
+        finalNote += `<img src=""/> \n`;
+      }
+    }
+
 
     console.log("transcription==>",response)
 
@@ -131,7 +229,7 @@ Examples:
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
 
 Text:
-${response}
+${finalNote}
       `.trim(),
     },
   ],
