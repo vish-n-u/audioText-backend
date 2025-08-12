@@ -9,7 +9,7 @@ const fs = require("fs");
 const OpenAI = require("openai");
 const openai = new OpenAI({
   apiKey: process.env.apiKey,
-});
+})
 
 
 const readFile = (filepath) => {
