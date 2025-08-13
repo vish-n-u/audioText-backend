@@ -189,7 +189,7 @@ const audioTranscription = async (req, res) => {
     }
 
 
-    console.log("transcription==>",response)
+    console.log("transcription==>",finalNote)
 
     data.usedTranscriptionTimeInMilliSec = String(newUsedTime);
     await data.save();
