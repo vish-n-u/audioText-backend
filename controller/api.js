@@ -6,22 +6,14 @@ const nodemailer = require("nodemailer")
 const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg") 
 const fs = require("fs");
+const path = require("path")
 const OpenAI = require("openai");
 const openai = new OpenAI({
   apiKey: process.env.apiKey,
 })
 
 
-const readFile = (filepath) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filepath, (err, buffer) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(buffer);
-    });
-  });
-};
+const { readFile } = require("node:fs/promises");
 
 const createUser = async (req, res) => {
   try {
@@ -82,7 +74,7 @@ const audioTranscription = async (req, res) => {
 
     console.log("reached here==>")
 
-    const buffer = await readFile(file.path);
+    // const buffer = await readFile(file.path);
     // const audioData = await WavDecoder.decode(buffer);
 
     // const audioDurationInSec = audioData.channelData[0].length / audioData.sampleRate;
