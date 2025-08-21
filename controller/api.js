@@ -209,11 +209,6 @@ If any parts of the text sound emotional, stressed, or strongly expressed, wrap 
 
 If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'.
 
-⚠️ Additionally, if the text sounds like a comparison between two or more items (e.g., "Product A vs Product B" or "Feature 1, Feature 2, Feature 3"), then **present the comparison in an HTML <table>**.  
-- Use the first row for headers (the items being compared).  
-- Each subsequent row should represent features/points.  
-- If not enough structure is clear, fall back to bullet points.  
-
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
 
 Text:
@@ -222,6 +217,7 @@ ${finalNote}
     },
   ],
 });
+
 
 
 console.log("formatData==>",formatData.choices[0].message.content.trim())
