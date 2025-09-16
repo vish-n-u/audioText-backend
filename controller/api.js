@@ -111,6 +111,8 @@ const audioTranscription = async (req, res) => {
     const outputChunks = [];
     const splitPoints = timestampsInMs;
 
+    console.log("splitPoints==>",splitPoints)
+
     const points = [0, ...splitPoints];
     const chunkPairs = [];
 
