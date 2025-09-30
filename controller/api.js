@@ -57,6 +57,9 @@ const audioTranscription = async (req, res) => {
      let summarizeContent = contentFormat == "transcript"?false:true
     console.log("[audioTranscription] ✅ Raw timestamps:", timestampsRaw);
 
+     console.log("req.saveContentAs,", req.saveContentAs,req.body.saveContentAs);
+     console.log("summarizeContent==>",summarizeContent)
+
     let timestampsInMs = [];
 
     if (timestampsRaw&&timestampsRaw !== "null") {
