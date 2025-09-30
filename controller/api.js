@@ -53,6 +53,8 @@ const audioTranscription = async (req, res) => {
 
     }
      let timestampsRaw = req.timestamps || req.body.timestamps;
+     let contentFormat = req.saveContentAs || req.body.saveContentAs
+     let summarizeContent = contentFormat == "transcript"?false:true
     console.log("[audioTranscription] ✅ Raw timestamps:", timestampsRaw);
 
     let timestampsInMs = [];
@@ -226,10 +228,42 @@ console.log("formatData==>",formatData.choices[0].message.content.trim())
 
 let html = formatData.choices[0].message.content.trim();
 
+if (summarizeContent) {
+  const summarizeData = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: `
+Summarize the following HTML transcript into a shorter, clean version.
+⚠️ Important:
+- Keep all <img> tags exactly as they are and in their correct order.
+- Do NOT remove, edit, or change the <img> tags.
+- The summary should only shorten/condense the textual content, while preserving structure and readability.
+
+Transcript:
+${html}
+        `.trim(),
+      },
+    ],
+  });
+
+  html = summarizeData.choices[0].message.content.trim();
+
+  // Remove accidental markdown wrappers
+  if (html.startsWith("```html")) {
+    html = html.replace(/^```html/, "").replace(/```$/, "").trim();
+  }
+}
+
+
 // Remove ```html and ``` if they exist
 if (html.startsWith("```html")) {
   html = html.replace(/^```html/, "").replace(/```$/, "").trim();
 }
+
+
+
     res.send({
       response:html,
       Used_Transcription_Duration: data.usedTranscriptionTimeInMilliSec,
