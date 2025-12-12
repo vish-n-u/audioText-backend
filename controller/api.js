@@ -215,7 +215,7 @@ Format the following plain text into clean, structured HTML using appropriate ta
 If any parts of the text sound emotional, stressed, or strongly expressed, wrap them in <strong> or <em> tags to show emphasis. Use <mark> if something should stand out dramatically.
 
 If any part of the text is not in the English alphabet (e.g., written in Hindi, Arabic, etc.), transliterate it to English letters (Roman script). For example, change 'कैसे हो' to 'kaise ho'.
-
+⚠️ Do NOT remove, edit, or change the <img> tags
 ⚠️ Do not wrap the output in any markdown-style code blocks. Just return plain raw HTML with no extra commentary.
 
 Text:
